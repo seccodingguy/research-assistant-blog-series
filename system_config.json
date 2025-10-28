@@ -1,0 +1,162 @@
+{
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "research_assistant",
+    "user": "research_user",
+    "password": "research_pass123",
+    "enabled": true,
+    "required": false
+  },
+  "chromadb": {
+    "persist_directory": "./chroma_db",
+    "collection_name": "research_papers",
+    "embedding_function": "azure_openai",
+    "chunk_size": 1000,
+    "chunk_overlap": 200
+  },
+  "chat_context_db": {
+    "db_path": "./databases/chat_context.db",
+    "enabled": true,
+    "auto_save": true,
+    "max_sessions": 1000,
+    "session_retention_days": 90
+  },
+  "visualization": {
+    "layout_algorithm": "spring",
+    "node_size_range": [300, 1500],
+    "edge_width_range": [1.0, 5.0],
+    "show_labels": true,
+    "show_edge_labels": true,
+    "font_size": 10,
+    "edge_font_size": 8,
+    "enable_hover": true,
+    "enable_selection": true,
+    "enable_zoom": true,
+    "output_format": "html",
+    "figure_size": [12, 8],
+    "dpi": 300,
+    "concept_colors": {
+      "default": "#3498db",
+      "person": "#e74c3c",
+      "organization": "#f39c12",
+      "location": "#2ecc71",
+      "technology": "#9b59b6",
+      "concept": "#1abc9c",
+      "method": "#34495e",
+      "theory": "#e67e22",
+      "data": "#95a5a6",
+      "result": "#f1c40f",
+      "application": "#8e44ad",
+      "tool": "#16a085",
+      "process": "#27ae60",
+      "system": "#2980b9",
+      "framework": "#d35400"
+    }
+  },
+  "azure_openai": {
+    "api_key": "4ONbvGRzHJ8MslrIWsJUybWVjhlHutql7lE1kmX78qarb2HOa84BJQQJ99BHACHYHv6XJ3w3AAAAACOGCHtG",
+    "endpoint_url": "https://mark-meq6k3ha-eastus2.cognitiveservices.azure.com/",
+    "model_name": "text-embedding-3-large",
+    "api_version": "2023-05-15",
+    "max_retries": 3,
+    "timeout_seconds": 30,
+    "max_tokens_per_request": 8000,
+    "embedding_dimension": 3072
+  },
+  "poe_service": {
+    "api_key": "hl1cJgSawyKtp97Vhl7kSvapTU7Mp_LmcKhJ0Rae7Dk",
+    "url": "https://api.poe.com/v1",
+    "model_name": "Claude-Sonnet-4",
+    "max_retries": 3,
+    "timeout_seconds": 120,
+    "max_tokens": 4000,
+    "temperature": 0.1,
+    "chunk_size": 800,
+    "stream": true
+  },
+  "ollama_service": {
+    "base_url": "http://192.168.50.70:11434",
+    "embedding_model": "nomic-embed-text",
+    "model_name": "llama2:latest",
+    "max_retries": 3,
+    "timeout_seconds": 120,
+    "max_tokens": 4000,
+    "temperature": 0.1,
+    "chunk_size": 800,
+    "stream": true
+  },
+  "search": {
+    "google_api_key": "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",
+    "google_cse_id": "730201453819-jtlpcq2bo0jgn34so5ht74vaoac5ttpd.apps.googleusercontent.com",
+    "unpaywall_email": "mark_wireman@hotmail.com",
+    "max_results_per_source": 100,
+    "timeout_seconds": 30,
+    "enabled_sources": [
+      "google_scholar",
+      "semantic_scholar",
+      "microsoft_academic",
+      "duckduckgo_academic",
+      "google_custom",
+      "core_ac_uk",
+      "base_search",
+      "unpaywall",
+      "arxiv",
+      "crossref"
+    ]
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "debug": false,
+    "cors_origins": ["*"],
+    "max_upload_size": 104857600,
+    "upload_directory": "./uploads"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "./logs/research_assistant.log",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "max_size_mb": 10,
+    "backup_count": 5
+  },
+  "agents": {
+    "search_agent": {
+      "enabled": true,
+      "max_concurrent_requests": 5,
+      "timeout_seconds": 300,
+      "retry_attempts": 3,
+      "config": {
+        "cache_results": true,
+        "cache_ttl_hours": 24
+      }
+    },
+    "pdf_agent": {
+      "enabled": true,
+      "max_concurrent_requests": 3,
+      "timeout_seconds": 600,
+      "retry_attempts": 2,
+      "config": {
+        "max_file_size_mb": 50,
+        "supported_formats": ["pdf"],
+        "extract_images": false,
+        "clean_text": true,
+        "min_chunk_length": 100,
+        "max_chunk_length": 8000,
+        "embedding_provider": "azure",
+        "llm_provider": "poe"
+      }
+    },
+    "knowledge_graph_agent": {
+      "enabled": true,
+      "max_concurrent_requests": 2,
+      "timeout_seconds": 900,
+      "retry_attempts": 1,
+      "config": {
+        "auto_save": true,
+        "save_interval_minutes": 10,
+        "max_entities": 10000
+      }
+    }
+  }
+}

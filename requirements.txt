@@ -1,0 +1,41 @@
+# requirements.txt
+# LlamaIndex - flexible versions to avoid build issues with Python 3.13
+llama-index
+llama-index-core
+llama-index-embeddings-openai
+llama-index-llms-openai
+llama-index-vector-stores-chroma
+llama-index-readers-file
+
+# PDF Processing
+pypdf2>=3.0.1
+pdfplumber>=0.10.3
+pymupdf>=1.24.0
+
+# Vector Store & Database
+chromadb>=0.5.0
+qdrant-client>=1.7.1
+
+# Memory & Context
+redis>=5.0.0
+sqlalchemy>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+watchdog>=3.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Logging & Monitoring
+loguru>=0.7.0
+rich>=13.7.0
+
+# API
+fastapi>=0.109.0
+uvicorn>=0.27.0
+requests>=2.31.0
+fastapi-poe>=0.0.36
+
+# Azure OpenAI
+openai>=1.0.0
+httpx>=0.24.0
