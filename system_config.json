@@ -55,8 +55,8 @@
     }
   },
   "azure_openai": {
-    "api_key": "4ONbvGRzHJ8MslrIWsJUybWVjhlHutql7lE1kmX78qarb2HOa84BJQQJ99BHACHYHv6XJ3w3AAAAACOGCHtG",
-    "endpoint_url": "https://mark-meq6k3ha-eastus2.cognitiveservices.azure.com/",
+    "api_key": "",
+    "endpoint_url": "",
     "model_name": "text-embedding-3-large",
     "api_version": "2023-05-15",
     "max_retries": 3,
@@ -65,7 +65,7 @@
     "embedding_dimension": 3072
   },
   "poe_service": {
-    "api_key": "hl1cJgSawyKtp97Vhl7kSvapTU7Mp_LmcKhJ0Rae7Dk",
+    "api_key": "",
     "url": "https://api.poe.com/v1",
     "model_name": "Claude-Sonnet-4",
     "max_retries": 3,
@@ -76,7 +76,7 @@
     "stream": true
   },
   "ollama_service": {
-    "base_url": "http://192.168.50.70:11434",
+    "base_url": "http://localhost:11434",
     "embedding_model": "nomic-embed-text",
     "model_name": "llama2:latest",
     "max_retries": 3,
@@ -87,9 +87,9 @@
     "stream": true
   },
   "search": {
-    "google_api_key": "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",
-    "google_cse_id": "730201453819-jtlpcq2bo0jgn34so5ht74vaoac5ttpd.apps.googleusercontent.com",
-    "unpaywall_email": "mark_wireman@hotmail.com",
+    "google_api_key": "",
+    "google_cse_id": "",
+    "unpaywall_email": "",
     "max_results_per_source": 100,
     "timeout_seconds": 30,
     "enabled_sources": [
