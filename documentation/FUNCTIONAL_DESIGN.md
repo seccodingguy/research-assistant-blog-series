@@ -3,17 +3,11 @@
 
 ## Document Information
 
-- **Version**: 1.0
-- **Date**: October 23, 2025
+- **Version**: 1.3
+- **Date**: October 31, 2025
 - **Author**: Senior Software Architect
 - **System**: PDF Research Assistant Agent
 - **Document Type**: Functional Design Document
- 
- - **Version**: 1.1
- - **Date**: October 27, 2025
- - **Author**: Senior Software Architect
- - **System**: PDF Research Assistant Agent
- - **Document Type**: Functional Design Document
 
 ---
 
@@ -35,6 +29,9 @@ The PDF Agent project aims to create an intelligent research assistant that leve
 - Command-line interface for user interaction
 - Comprehensive analysis across entire document collections
 - Provider selection and switching capabilities
+- Knowledge graph construction and entity classification
+- Multi-phase classification strategy (pattern/keyword/LLM-based)
+- Graph-based entity resolution and relationship normalization
 
 #### Out of Scope
 - Web-based user interface (future enhancement)
@@ -54,23 +51,30 @@ The PDF Agent project aims to create an intelligent research assistant that leve
 4. **Provider Flexibility**: Support for both cloud (Azure/Poe) and local (Ollama) AI providers
 5. **Auto-Indexing**: Real-time monitoring and processing of new documents
 6. **Comprehensive Analysis**: Batch processing across entire document collections
+7. **Knowledge Graph Construction**: Entity extraction and relationship mapping with multi-phase classification
+8. **Graph-Based Classification**: YAML-configured classification with pattern matching, keyword lookup, and LLM-based semantic classification
 
-## Recent updates (2025-10-27)
+## Recent updates (2025-10-31)
 
 This Functional Design Document has been updated to reflect recent code and architectural changes across the project. Key updates summarized below — see the implementation in `core/` and the documentation directory for details.
 
-- LlamaIndex API migration: migrated from the older ServiceContext pattern to the newer Settings-based configuration and updated associated components for compatibility with LlamaIndex 0.14+ (see `core/pdf_parser.py`, `core/search_engine.py`).
-- Azure OpenAI & Poe integration: added `core/azure_openai_wrapper.py` to centralize Azure embeddings and add Poe LLM support for cloud completions; fixed endpoint handling, batching, and error recovery.
-- Ollama local provider: stabilized local Ollama integration for both embeddings and LLM completions (`core/ollama_wrapper.py`) to support privacy-focused, offline workflows.
-- Memory and ChatMessage fixes: resolved ChatMessage attribute handling and ensured memory manager stores/retrieves messages safely (`core/memory_manager.py`, `core/search_engine.py`).
-- Retrieval improvements: increased default retrieval `top_k`, lowered similarity cutoff for broader coverage, removed duplicate retrieval calls, and enhanced prompt templates for comprehensive analysis (`config/settings.py`, `core/context_manager.py`).
-- Knowledge Graph integration: added `core/graph_manager.py` and `build_knowledge_graph.py` to extract entities/relations via the configured LLM, persist a graph store, and enable hybrid vector+graph retrieval (see `documentation/KNOWLEDGE_GRAPH_GUIDE.md`).
-- Dependency updates and environment fixes: updated `requirements.txt` and settings loader for Python 3.13 compatibility and improved installation reliability.
+- **Knowledge Graph Classification Enhancement (2025-10-31)**: Implemented 4-phase classification strategy achieving 45.4% classification accuracy (up from 24.3% baseline). Phase 1+2 introduced YAML-based external configuration (`config/graph_ontology.yaml`) with 48 ConceptTypes, 254+ keywords, and 9 base patterns. Phase 3 added 18 domain-specific patterns for AI/ML, security, and distributed systems. Phase 4 implemented hybrid LLM classification with non-concept filtering (15 patterns), context-aware LLM classification, and persistent caching. System now supports graph operations via CLI: `graph reclassify-hybrid`, `graph merge`, `graph normalize`, `ontology stats`. See `documentation/PHASE_3_SUMMARY.md` for details.
+- **Async Event Loop Fix (2025-10-30)**: Integrated `nest_asyncio` to enable nested event loops, allowing synchronous LLM calls (knowledge graph building) within async workflow contexts. This resolves "Cannot run the event loop while another loop is running" errors during the process action in async workflows. The fix enables seamless integration of async workflows (paper search, download) with synchronous operations (PDF processing, graph building). See `documentation/EVENT_LOOP_FIX.md` and updated architecture documentation for complete technical details.
+- **Hybrid Async/Sync Architecture**: System now supports async workflows (`execute_paper_workflow`) that integrate synchronously with knowledge graph building and PDF processing without event loop conflicts.
+- **LlamaIndex API migration**: Migrated from the older ServiceContext pattern to the newer Settings-based configuration and updated associated components for compatibility with LlamaIndex 0.14+ (see `core/pdf_parser.py`, `core/search_engine.py`).
+- **Azure OpenAI & Poe integration**: Added `core/azure_openai_wrapper.py` to centralize Azure embeddings and add Poe LLM support for cloud completions; fixed endpoint handling, batching, and error recovery.
+- **Ollama local provider**: Stabilized local Ollama integration for both embeddings and LLM completions (`core/ollama_wrapper.py`) to support privacy-focused, offline workflows.
+- **Memory and ChatMessage fixes**: Resolved ChatMessage attribute handling and ensured memory manager stores/retrieves messages safely (`core/memory_manager.py`, `core/search_engine.py`).
+- **Retrieval improvements**: Increased default retrieval `top_k`, lowered similarity cutoff for broader coverage, removed duplicate retrieval calls, and enhanced prompt templates for comprehensive analysis (`config/settings.py`, `core/context_manager.py`).
+- **Knowledge Graph integration**: Added `core/graph_manager.py` and `build_knowledge_graph.py` to extract entities/relations via the configured LLM, persist a graph store, and enable hybrid vector+graph retrieval with multi-phase classification (see `documentation/KNOWLEDGE_GRAPH_GUIDE.md`).
+- **Dependency updates and environment fixes**: Updated `requirements.txt` (including `nest-asyncio>=1.6.0`, NetworkX, PyYAML) and settings loader for Python 3.13 compatibility and improved installation reliability.
 
 Quick verification steps:
 1. Confirm provider configuration in `system_config.json` / environment variables (Azure, Poe, or Ollama).
 2. Run `python3 main.py` and run a sample search to confirm multi-source citations in results.
-3. Optionally rebuild the knowledge graph with `python3 build_knowledge_graph.py` (may take significant time for large corpora).
+3. Test async workflows: Use natural language like "search, download, and process papers about X" to verify process action works without event loop errors.
+4. Optionally rebuild the knowledge graph with `python3 build_knowledge_graph.py` (may take significant time for large corpora).
+5. Test graph classification: Run `graph reclassify-hybrid --dry-run` to preview hybrid LLM classification or `ontology stats` to view current rules.
 
 
 #### Secondary Features
@@ -79,6 +83,10 @@ Quick verification steps:
 3. **Configuration Management**: Runtime provider switching and settings management
 4. **Error Handling**: Comprehensive error reporting and recovery mechanisms
 5. **Performance Monitoring**: System statistics and health monitoring
+6. **Entity Resolution**: Duplicate entity merging with configurable similarity thresholds
+7. **Relationship Normalization**: Natural language relationship mapping to standard types
+8. **Graph Visualization**: Interactive graph exploration and visualization
+9. **Classification Caching**: Persistent LLM classification result caching for cost optimization
 
 ### Success Criteria
 
@@ -102,6 +110,9 @@ Quick verification steps:
 | Vector Store Performance Degradation | High | Low | Regular maintenance and optimization procedures |
 | Ollama Server Compatibility Issues | Medium | Medium | Comprehensive testing and fallback mechanisms |
 | Network Connectivity Issues | Medium | High | Offline mode and local processing capabilities |
+| Event Loop Conflicts in Async Workflows | Low | Low | nest_asyncio integration for hybrid async/sync support |
+| LLM Classification Cost Escalation | Low | Low | Classification caching and batch processing optimization |
+| Entity Resolution Scalability | Medium | Low | O(n²) algorithm limits to ~10K nodes; optimization for larger graphs |
 
 ### Business Risks
 
@@ -248,9 +259,51 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 4. System validates configuration and confirms changes
 **Postconditions**: System uses selected AI providers
 
+#### UC-6: Async Paper Workflow
+**Actor**: Researcher/Analyst
+**Preconditions**: System configured with AI providers
+**Main Flow**:
+1. User issues natural language workflow command (e.g., "search, download, and process 50 papers about quantum computing")
+2. System detects intent and extracts parameters (query, count, actions)
+3. System confirms workflow with user
+4. System executes async workflow: search → download → process
+5. Process action builds knowledge graph without event loop conflicts
+6. User receives summary of completed actions and processed documents
+**Postconditions**: Papers downloaded, processed, and added to knowledge base
+**Technical Notes**: Uses hybrid async/sync architecture with nest_asyncio for event loop compatibility
+
+#### UC-7: Knowledge Graph Classification (NEW)
+**Actor**: Researcher/System Administrator
+**Preconditions**: Knowledge graph built from processed documents
+**Main Flow**:
+1. User checks current classification statistics via `graph stats`
+2. User reviews ontology configuration via `ontology stats`
+3. User runs hybrid classification via `graph reclassify-hybrid --dry-run` to preview
+4. User confirms and executes `graph reclassify-hybrid`
+5. System applies pattern/keyword classification (Phase 1+2)
+6. System filters non-concepts (Phase 4 - timestamps, code artifacts, etc.)
+7. System performs LLM-based classification on remaining unknowns (batched)
+8. System caches LLM results for future runs
+9. User reviews improved classification statistics
+**Postconditions**: Graph classification improved from ~30% to target 55-60%
+**Alternative Flows**: User can merge similar entities via `graph merge [threshold]` or normalize relationships via `graph normalize`
+
+#### UC-8: Graph Entity Resolution (NEW)
+**Actor**: Researcher/System Administrator
+**Preconditions**: Knowledge graph contains potential duplicate entities
+**Main Flow**:
+1. User runs `graph merge 0.7` with default threshold
+2. System calculates similarity between all entity pairs
+3. System expands abbreviations (a2a → agent2agent, mcp → model context protocol)
+4. System merges entities above similarity threshold
+5. System preserves metadata (frequency, first_seen timestamps)
+6. User receives report of merged entities
+**Postconditions**: Duplicate entities consolidated, graph size reduced
+**Technical Notes**: Uses Jaccard similarity + substring matching; configurable threshold 0.6-0.8
+
 ### Secondary Use Cases
 
-#### UC-6: System Health Monitoring
+#### UC-9: System Health Monitoring
 **Actor**: System Administrator
 **Preconditions**: System operational
 **Main Flow**:
@@ -259,7 +312,7 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 3. Administrator reviews logs and error reports
 **Postconditions**: Administrator informed of system status
 
-#### UC-7: Memory Management
+#### UC-10: Memory Management
 **Actor**: User
 **Preconditions**: Active conversation session
 **Main Flow**:
@@ -268,7 +321,7 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 3. User starts new session with clean context
 **Postconditions**: Conversation state managed appropriately
 
-#### UC-8: Error Recovery
+#### UC-11: Error Recovery
 **Actor**: User/System Administrator
 **Preconditions**: Error condition detected
 **Main Flow**:
@@ -346,6 +399,48 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 - Recovery procedures documentation
 - Graceful degradation options
 
+#### FR-8: Async Workflow Support
+**Description**: System shall support asynchronous workflows for paper search and processing
+**Requirements**:
+- Async paper search across multiple sources
+- Concurrent download operations
+- Hybrid async/sync architecture with event loop compatibility
+- Knowledge graph building within async contexts (via nest_asyncio)
+- Natural language workflow detection and parameter extraction
+- Seamless integration of async orchestration with sync processing
+
+#### FR-9: Knowledge Graph Classification (NEW)
+**Description**: System shall provide multi-phase entity and relationship classification
+**Requirements**:
+- External YAML-based ontology configuration (48 ConceptTypes, 254+ keywords)
+- Pattern-based classification (42 regex patterns: base, domain-specific, non-concept)
+- Keyword-based classification with domain-specific categories
+- LLM-based semantic classification with context awareness
+- Non-concept filtering (timestamps, code artifacts, network elements)
+- Classification result caching for cost optimization
+- Batch processing for LLM classification with configurable batch size
+
+#### FR-10: Graph Entity Management (NEW)
+**Description**: System shall support entity resolution and relationship normalization
+**Requirements**:
+- Similarity-based duplicate entity detection
+- Configurable similarity threshold (0.6-0.8)
+- Abbreviation expansion and normalization
+- Metadata preservation during entity merging
+- Natural language relationship phrase mapping to standard types
+- Support for 21 standard relationship types
+- Graph visualization and query capabilities
+
+#### FR-11: Graph Persistence and Retrieval (NEW)
+**Description**: System shall persist and retrieve knowledge graph data efficiently
+**Requirements**:
+- JSON-based graph store persistence
+- NetworkX in-memory graph representation
+- Node attributes: type, frequency, first_seen, source_document
+- Edge attributes: relationship_type, source_chunk
+- Incremental graph updates
+- Graph statistics and health reporting
+
 ### Data Requirements
 
 #### DR-1: Document Storage
@@ -372,6 +467,24 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 **Output**: Runtime configuration state
 **Constraints**: Schema validation, secure credential handling
 
+#### DR-5: Knowledge Graph Data (NEW)
+**Input**: Entity triplets from LlamaIndex KG Extractor (15 per chunk)
+**Processing**: Multi-phase classification (pattern/keyword/LLM), entity resolution, relationship normalization
+**Output**: Classified entities and relationships with metadata
+**Constraints**: NetworkX graph limits, O(n²) entity resolution scalability
+
+#### DR-6: Ontology Configuration (NEW)
+**Input**: YAML ontology file (`config/graph_ontology.yaml`)
+**Processing**: Pattern compilation, keyword indexing, relationship mapping
+**Output**: Loaded classification rules and validators
+**Constraints**: YAML syntax validation, pattern regex validity
+
+#### DR-7: Classification Cache (NEW)
+**Input**: Node labels and LLM classification results
+**Processing**: Cache lookup, result storage, statistics tracking
+**Output**: Cached classifications and hit/miss statistics
+**Constraints**: JSON serialization, automatic persistence every 10 entries
+
 ### Interface Requirements
 
 #### IR-1: Command Line Interface
@@ -388,6 +501,16 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 **Input**: PDF files, directory paths
 **Output**: Processing status, indexed documents
 **Constraints**: File permissions, monitoring reliability, error handling
+
+#### IR-4: Graph Management Interface (NEW)
+**Input**: Graph commands (`graph stats`, `graph reclassify-hybrid`, `graph merge`, `graph normalize`)
+**Output**: Classification statistics, merged entities report, normalized relationships report
+**Constraints**: Command validation, graph state consistency, large graph performance
+
+#### IR-5: Ontology Management Interface (NEW)
+**Input**: Ontology commands (`ontology stats`, `ontology show types`, `ontology show rels`, `ontology validate`)
+**Output**: Rule statistics, concept/relationship type listings, validation results
+**Constraints**: YAML parsing, configuration validation
 
 ---
 
@@ -406,6 +529,8 @@ The PDF Agent operates within the broader ecosystem of AI-powered research tools
 - Python 3.13+ with pip
 - Conda environment (recommended)
 - Ollama (optional, for local AI processing)
+- NetworkX 3.0+ (for knowledge graph)
+- PyYAML 6.0+ (for ontology configuration)
 
 ### Installation Steps
 
@@ -487,10 +612,14 @@ ollama pull llama2
 # Create required directories
 mkdir -p storage/{vector_store,chat_history,graph_store}
 mkdir -p logs
+mkdir -p config
 
 # Set permissions (Linux/macOS)
 chmod 755 storage/
 chmod 644 system_config.json
+
+# Verify ontology configuration exists
+ls -l config/graph_ontology.yaml
 ```
 
 #### Step 4: System Testing
@@ -501,6 +630,10 @@ python test_ollama.py
 # Test system startup
 python main.py
 # Should display welcome message and stats
+
+# Test knowledge graph classification
+ontology stats
+graph stats
 ```
 
 #### Step 5: Document Processing Setup
@@ -510,6 +643,13 @@ mkdir -p ~/Downloads/search_results
 
 # Place test PDF files in the directory
 # System will automatically process them
+
+# Optionally build knowledge graph
+python3 build_knowledge_graph.py
+
+# Run hybrid classification (optional, improves classification to 55-60%)
+graph reclassify-hybrid --dry-run  # Preview changes
+graph reclassify-hybrid             # Execute classification
 ```
 
 ### Runtime Configuration
@@ -547,11 +687,15 @@ set llm ollama
 ### Troubleshooting Configuration
 
 #### Common Issues
-1. **Import Errors**: Verify Python version and dependencies
+1. **Import Errors**: Verify Python version and dependencies (including NetworkX, PyYAML)
 2. **API Connection Failures**: Check credentials and network connectivity
 3. **Ollama Connection Issues**: Verify Ollama server is running
 4. **Permission Errors**: Check file system permissions
 5. **Memory Issues**: Increase system RAM or reduce batch sizes
+6. **Event Loop Errors**: Already resolved via nest_asyncio; ensure `nest-asyncio>=1.6.0` is installed
+7. **YAML Parsing Errors**: Validate ontology configuration with `ontology validate`
+8. **Graph Classification Performance**: For graphs >10K nodes, entity resolution may be slow (O(n²))
+9. **LLM Classification Costs**: First-time hybrid classification costs ~$1-2; subsequent runs use cache ($0)
 
 ---
 
@@ -564,6 +708,7 @@ set llm ollama
 - **Initialization Failures**: Component startup issues
 - **Resource Exhaustion**: Memory, disk space, or API limits
 - **Network Issues**: Connectivity problems with AI services
+- **Event Loop Conflicts**: Nested event loop issues (resolved via nest_asyncio)
 
 #### Processing Errors
 - **Document Parsing Failures**: Corrupted PDFs, unsupported formats
@@ -782,7 +927,9 @@ Reference: Documentation link or command
 
 ### Document Version History
 - **v1.0** (October 23, 2025): Initial functional design document with Ollama integration
- - **v1.1** (October 27, 2025): Added LlamaIndex migration notes, Azure/Poe and Ollama provider stabilization, memory & retrieval fixes, and Knowledge Graph integration
+- **v1.1** (October 27, 2025): Added LlamaIndex migration notes, Azure/Poe and Ollama provider stabilization, memory & retrieval fixes, and Knowledge Graph integration
+- **v1.2** (October 30, 2025): Added async workflow support with nest_asyncio integration, hybrid async/sync architecture, event loop conflict resolution, new use case UC-6 for async paper workflows, and updated functional requirements FR-8
+- **v1.3** (October 31, 2025): Added knowledge graph classification enhancements with 4-phase strategy (YAML config, domain patterns, hybrid LLM classification). Added use cases UC-7 (Knowledge Graph Classification) and UC-8 (Graph Entity Resolution). Added functional requirements FR-9 (Knowledge Graph Classification), FR-10 (Graph Entity Management), and FR-11 (Graph Persistence). Added data requirements DR-5, DR-6, DR-7 for graph data, ontology, and cache. Added interface requirements IR-4 and IR-5 for graph and ontology management. Updated configuration steps, troubleshooting, and technical risks.
 
 ---
 

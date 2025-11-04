@@ -17,12 +17,14 @@ from llama_index.core.extractors import (
 from llama_index.core.ingestion import IngestionPipeline
 from core.azure_openai_wrapper import AzureOpenAIEmbedding
 from core.graph_manager import GraphManager
+from core.metadata_db import get_metadata_db
 
 import chromadb
 from pathlib import Path
 from typing import List, Dict, Optional
 import hashlib
 from datetime import datetime
+import uuid
 
 from config import settings
 from utils.logger import log
@@ -107,6 +109,14 @@ class PDFParser:
             log.warning(f"GraphManager initialization failed: {e}")
             self.graph_manager = None
         
+        # Initialize metadata database
+        try:
+            self.metadata_db = get_metadata_db()
+            log.info("✓ Metadata database initialized")
+        except Exception as e:
+            log.warning(f"Metadata database initialization failed: {e}")
+            self.metadata_db = None
+        
         # Get expected embedding dimension based on provider
         if settings.EMBEDDING_PROVIDER.lower() == "azure":
             expected_dimension = settings.AZURE_OPENAI_EMBEDDING_DIMENSION
@@ -116,8 +126,17 @@ class PDFParser:
             expected_dimension = None
         
         # Initialize Chroma client
+        # Add settings to avoid readonly database issues in WSL/Windows mounts
+        import chromadb.config
+        chroma_settings = chromadb.config.Settings(
+            anonymized_telemetry=False,
+            allow_reset=True,
+            is_persistent=True,
+        )
+        
         self.chroma_client = chromadb.PersistentClient(
-            path=str(settings.VECTOR_STORE_PATH)
+            path=str(settings.VECTOR_STORE_PATH),
+            settings=chroma_settings
         )
         
         # Check for dimension mismatch and handle collection migration
@@ -304,20 +323,43 @@ class PDFParser:
                 log.info(f"File already processed: {file_path.name}")
                 return []
             
+            # Generate unique document ID
+            document_id = str(uuid.uuid4())
+            parsed_date = datetime.now().isoformat()
+            
             # Load documents
             reader = SimpleDirectoryReader(
                 input_files=[str(file_path)],
                 file_metadata=lambda filename: {
+                    "document_id": document_id,
                     "file_name": Path(filename).name,
                     "file_path": str(filename),
                     "file_hash": file_hash,
-                    "parsed_date": datetime.now().isoformat(),
+                    "parsed_date": parsed_date,
                     "file_type": "pdf"
                 }
             )
             
             documents = reader.load_data()
             log.info(f"Loaded {len(documents)} documents from {file_path.name}")
+            
+            # Save document metadata to database
+            if self.metadata_db is not None:
+                try:
+                    self.metadata_db.insert_document(
+                        document_id=document_id,
+                        file_name=file_path.name,
+                        file_path=str(file_path.absolute()),
+                        file_hash=file_hash,
+                        parsed_date=parsed_date,
+                        title=file_path.stem,  # Use filename as title for now
+                        metadata={
+                            "total_chunks": len(documents)
+                        }
+                    )
+                    log.info(f"✓ Saved document metadata to database: {document_id}")
+                except Exception as e:
+                    log.warning(f"Failed to save document metadata: {e}")
             
             return documents
             
@@ -357,13 +399,61 @@ class PDFParser:
             nodes = self.pipeline.run(documents=documents)
             log.info(f"Generated {len(nodes)} nodes from documents")
             
+            # Save embedding metadata to database
+            if self.metadata_db is not None:
+                try:
+                    for idx, node in enumerate(nodes):
+                        # Extract document metadata
+                        doc_metadata = node.metadata if hasattr(node, 'metadata') else {}
+                        document_id = doc_metadata.get('document_id', str(uuid.uuid4()))
+                        
+                        # Generate unique embedding ID
+                        embedding_id = node.node_id if hasattr(node, 'node_id') else str(uuid.uuid4())
+                        
+                        # Determine embedding provider and model
+                        embedding_provider = settings.EMBEDDING_PROVIDER
+                        if embedding_provider.lower() == "azure":
+                            embedding_model = settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+                            vector_dimension = settings.AZURE_OPENAI_EMBEDDING_DIMENSION
+                        elif embedding_provider.lower() == "ollama":
+                            embedding_model = settings.OLLAMA_EMBEDDING_MODEL
+                            vector_dimension = 768  # nomic-embed-text dimension
+                        else:
+                            embedding_model = "unknown"
+                            vector_dimension = None
+                        
+                        # Insert embedding metadata
+                        self.metadata_db.insert_embedding(
+                            embedding_id=embedding_id,
+                            document_id=document_id,
+                            chunk_index=idx,
+                            chunk_text=node.text if hasattr(node, 'text') else "",
+                            chunk_size=len(node.text) if hasattr(node, 'text') else 0,
+                            vector_dimension=vector_dimension,
+                            embedding_provider=embedding_provider,
+                            embedding_model=embedding_model,
+                            vector_store_collection=settings.COLLECTION_NAME,
+                            metadata=doc_metadata
+                        )
+                    
+                    log.info(f"✓ Saved {len(nodes)} embedding records to database")
+                    
+                    # Update document chunk count
+                    if documents and hasattr(documents[0], 'metadata'):
+                        doc_id = documents[0].metadata.get('document_id')
+                        if doc_id:
+                            self.metadata_db.update_document_chunk_count(doc_id, len(nodes))
+                
+                except Exception as e:
+                    log.warning(f"Failed to save embedding metadata: {e}")
+            
             # Add documents to knowledge graph
             if self.graph_manager is not None:
                 try:
                     log.info("Adding documents to knowledge graph...")
                     self.graph_manager.add_documents_to_graph(
                         documents,
-                        max_triplets_per_chunk=5
+                        max_triplets_per_chunk=15  # Increased for richer graph
                     )
                 except Exception as e:
                     log.warning(f"Failed to add to knowledge graph: {e}")
