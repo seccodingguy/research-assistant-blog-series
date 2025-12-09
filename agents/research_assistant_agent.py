@@ -5,6 +5,14 @@ import os
 import logging
 from agents.pdf_agent import PDFAgent
 from utils.logger import log
+from utils.exceptions import (
+    DocumentProcessingError,
+    InvalidDocumentError,
+    DocumentNotFoundError,
+    SearchError,
+    InvalidQueryError,
+    PathValidationError
+)
 from config import settings
 
 logfilename = os.path.join("logs", "research_assistant_agent.log")
@@ -13,7 +21,7 @@ logfilename = os.path.join("logs", "research_assistant_agent.log")
 logging.basicConfig(
     filename=logfilename,
     level=logging.INFO,  # Changed from DEBUG to INFO to prevent log spam
-    filemode="w",
+    filemode="a",
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
@@ -27,7 +35,8 @@ logging.getLogger("pdfminer").setLevel(logging.WARNING)
 class ResearchAssistantAgent:
     """
     High-level research assistant that orchestrates PDF processing,
-    paper search, knowledge graph queries, and conversation management.
+    paper search, knowledge graph queries, conversation management,
+    and complex multi-step research workflows.
     """
     
     def __init__(self, user_id: str = "default", auto_watch: Optional[bool] = None):
@@ -43,6 +52,9 @@ class ResearchAssistantAgent:
         self._paper_service = None
         self._paper_service_initialized = False
         
+        # Workflow orchestrator (lazy initialization)
+        self._workflow_orchestrator = None
+        
         log.info("ResearchAssistantAgent initialized successfully!")
     
     async def _ensure_paper_service(self):
@@ -57,6 +69,14 @@ class ResearchAssistantAgent:
         
         return self._paper_service
     
+    def _get_workflow_orchestrator(self):
+        """Get or create workflow orchestrator (lazy initialization)"""
+        if self._workflow_orchestrator is None:
+            from core.workflow_orchestrator import WorkflowOrchestrator
+            self._workflow_orchestrator = WorkflowOrchestrator(self)
+            log.info("Workflow orchestrator initialized")
+        return self._workflow_orchestrator
+    
     # ==================== Document Processing ====================
     
     def process_pdf(self, file_path: Path) -> Dict[str, Any]:
@@ -67,6 +87,29 @@ class ResearchAssistantAgent:
             Dict with 'success' (bool) and 'message' (str)
         """
         try:
+            # Validate file path to prevent directory traversal
+            file_path = Path(file_path).resolve()
+            if not file_path.exists():
+                return {
+                    "success": False,
+                    "message": f"File not found: {file_path.name}",
+                    "file_name": str(file_path.name)
+                }
+            
+            if not file_path.is_file():
+                return {
+                    "success": False,
+                    "message": f"Path is not a file: {file_path.name}",
+                    "file_name": str(file_path.name)
+                }
+            
+            if not file_path.suffix.lower() == '.pdf':
+                return {
+                    "success": False,
+                    "message": f"Not a PDF file: {file_path.name}",
+                    "file_name": file_path.name
+                }
+            
             success = self.pdf_agent.process_pdf(file_path)
             return {
                 "success": success,
@@ -89,10 +132,32 @@ class ResearchAssistantAgent:
             Dict with 'success', 'documents_processed', and optional 'error'
         """
         try:
+            # Validate folder path
+            folder_path = Path(folder_path).resolve()
+            if not folder_path.exists():
+                raise DocumentNotFoundError(f"Folder not found: {folder_path}")
+            
+            if not folder_path.is_dir():
+                raise PathValidationError(f"Path is not a directory: {folder_path}")
+            
             result = self.pdf_agent.process_folder(folder_path)
             return result
+        except (DocumentNotFoundError, PathValidationError) as e:
+            log.error(f"Validation error processing folder: {folder_path} - {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "documents_processed": 0
+            }
+        except DocumentProcessingError as e:
+            log.error(f"Processing error for folder: {folder_path} - {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "documents_processed": 0
+            }
         except Exception as e:
-            log.exception(f"Error processing folder: {folder_path}")
+            log.exception(f"Unexpected error processing folder: {folder_path}")
             return {
                 "success": False,
                 "error": str(e),
@@ -114,6 +179,29 @@ class ResearchAssistantAgent:
             Dict with 'answer', 'sources', 'metadata'
         """
         try:
+            # Validate input
+            if not query or not query.strip():
+                return {
+                    "answer": "Please provide a valid search query.",
+                    "sources": [],
+                    "error": "Empty query"
+                }
+            
+            query = query.strip()
+            
+            # Validate query length
+            if len(query) > 5000:
+                return {
+                    "answer": "Query too long. Please limit to 5000 characters.",
+                    "sources": [],
+                    "error": "Query too long"
+                }
+            
+            # Validate mode
+            valid_modes = ["basic", "enhanced", "analyze_all"]
+            if mode not in valid_modes:
+                mode = "enhanced"  # Default to safe mode
+            
             return self.pdf_agent.search(query, mode=mode, save_to_memory=save_to_memory)
         except Exception as e:
             log.exception(f"Error during search: {query}")
@@ -145,8 +233,15 @@ class ResearchAssistantAgent:
                 "sources": result.get("sources", []),
                 "metadata": result.get("metadata", {})
             }
+        except SearchError as e:
+            log.error(f"Search error during chat: {message} - {e}")
+            return {
+                "response": f"Search failed: {str(e)}",
+                "sources": [],
+                "error": str(e)
+            }
         except Exception as e:
-            log.exception(f"Error during chat: {message}")
+            log.exception(f"Unexpected error during chat: {message}")
             return {
                 "response": f"Chat failed: {str(e)}",
                 "sources": [],
@@ -429,22 +524,38 @@ class ResearchAssistantAgent:
         query_lower = query.lower()
         
         # Keywords for paper search/download/process
+        # Made more specific to avoid false positives with local PDF searches
+        # "search the papers" = local search, "search for papers" = online search
         search_keywords = [
-            'search papers', 'find papers', 'look for papers',
-            'search for papers', 'search', 'find'
+            'search for papers', 'find papers about', 'look for papers on',
+            'search for academic papers', 'find academic papers',
+            'search arxiv', 'search semantic scholar', 'search pubmed'
         ]
         download_keywords = [
-            'download', 'get papers', 'fetch papers',
-            'retrieve papers', 'get'
+            'download papers', 'get papers', 'fetch papers',
+            'retrieve papers', 'download from'
         ]
         process_keywords = [
-            'process', 'index', 'add to knowledge base', 'ingest'
+            'process papers', 'index papers', 'add papers to knowledge base', 
+            'ingest papers', 'process downloaded'
         ]
         
         # Check if this is a paper workflow request
         has_search = any(keyword in query_lower for keyword in search_keywords)
         has_download = any(keyword in query_lower for keyword in download_keywords)
         has_process = any(keyword in query_lower for keyword in process_keywords)
+        
+        # Enhanced detection: Check for workflow patterns like "Search, download, and process papers"
+        # This handles comma-separated action lists that don't use exact phrases
+        workflow_pattern = r'\b(search|download|process)\b[,\s]+(and\s+)?\b(search|download|process)\b'
+        if re.search(workflow_pattern, query_lower) and 'papers' in query_lower:
+            # Found workflow pattern with "papers" keyword - enable individual actions
+            if 'search' in query_lower:
+                has_search = True
+            if 'download' in query_lower:
+                has_download = True
+            if 'process' in query_lower:
+                has_process = True
         
         if not (has_search or has_download or has_process):
             return {
@@ -500,7 +611,8 @@ class ResearchAssistantAgent:
         remove_tokens = {
             'search', 'find', 'look', 'download', 'process', 'get', 'fetch',
             'and', 'or', 'the', 'a', 'an', 'papers', 'paper', 'them', 'it',
-            'please', 'can', 'you', 'could', 'would', 'save', 'in', 'to', 'at'
+            'please', 'can', 'you', 'could', 'would', 'save', 'in', 'to', 'at',
+            'per', 'source', 'sources'
         }
         
         # Split into words, filter out unwanted tokens, rejoin
@@ -623,6 +735,10 @@ class ResearchAssistantAgent:
                     "details": process_details
                 }
                 workflow_result["actions_completed"].append("process")
+                
+            # Convert Path objects to strings for JSON serialization
+            if workflow_result.get("downloaded_files"):
+                workflow_result["downloaded_files"] = [str(p) for p in workflow_result["downloaded_files"]]
             
             return workflow_result
             
@@ -863,3 +979,216 @@ class ResearchAssistantAgent:
         log.info("Shutting down ResearchAssistantAgent...")
         self.pdf_agent.shutdown()
         log.info("ResearchAssistantAgent shutdown complete")
+    
+    def detect_literature_review_intent(self, query: str) -> Dict[str, Any]:
+        """
+        Detect if user wants to create a literature review from natural language
+        
+        Args:
+            query: User's natural language query
+        
+        Returns:
+            Dict with 'is_literature_review', 'title', 'topic', 'select_all'
+        """
+        import re
+        
+        query_lower = query.lower()
+        
+        # Keywords for literature review creation
+        create_keywords = [
+            'create a literature review', 'create literature review',
+            'generate a literature review', 'generate literature review',
+            'make a literature review', 'make literature review'
+        ]
+        
+        if not any(keyword in query_lower for keyword in create_keywords):
+            return {
+                "is_literature_review": False,
+                "title": None,
+                "topic": None,
+                "select_all": False
+            }
+            
+        # Extract title
+        title = "Literature Review" # Default
+        title_match = re.search(r'(?:named|titled|with the name|with title)\s+["\']?([^"\']+?)["\']?(?:\s+selecting|\s+using|\s+with|\s*$)', query_lower)
+        if title_match:
+            title = title_match.group(1).strip()
+            
+        # Check for "select all" intent
+        select_all = 'select all' in query_lower or 'selecting all' in query_lower or 'use all' in query_lower or 'using all' in query_lower
+        
+        # Extract topic filter
+        topic = None
+        topic_match = re.search(r'(?:about|on|regarding|covering)\s+(.+?)(?:\s*$)', query_lower)
+        if topic_match:
+            topic = topic_match.group(1).strip()
+            
+        return {
+            "is_literature_review": True,
+            "title": title,
+            "topic": topic,
+            "select_all": select_all
+        }
+    
+    # ==================== Advanced Workflow Methods ====================
+    
+    async def execute_research_workflow(
+        self,
+        prompt: str,
+        progress_callback: Optional[callable] = None
+    ) -> Dict[str, Any]:
+        """
+        Execute a complex multi-step research workflow from natural language.
+        
+        This handles sophisticated workflows like:
+        - Doctoral dissertation planning
+        - Literature reviews with topic selection
+        - Multi-stage research projects
+        
+        Args:
+            prompt: Natural language description of the research workflow
+            progress_callback: Optional callback for progress updates
+            
+        Returns:
+            Dict with workflow results, steps, and outputs
+            
+        Example:
+            ```python
+            result = await agent.execute_research_workflow(
+                "Propose 5 topics on AI agents, download 10 papers per topic, "
+                "select the best topic, and justify the selection"
+            )
+            ```
+        """
+        try:
+            orchestrator = self._get_workflow_orchestrator()
+            
+            if progress_callback:
+                orchestrator.register_progress_callback(progress_callback)
+            
+            result = await orchestrator.execute_workflow(prompt)
+            
+            return result
+            
+        except Exception as e:
+            log.exception("Error executing research workflow")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    def detect_research_workflow_intent(self, query: str) -> Dict[str, Any]:
+        """
+        Detect if query is a complex research workflow that requires orchestration.
+        
+        Detects patterns like:
+        - Doctoral research planning
+        - Multi-topic literature reviews
+        - Topic proposal + selection workflows
+        
+        Args:
+            query: Natural language query
+            
+        Returns:
+            Dict with detection results and workflow type
+        """
+        query_lower = query.lower()
+        
+        # Doctoral research indicators
+        doctoral_indicators = [
+            "doctoral", "dissertation", "phd", "scholar-practitioner",
+            "research interest", "research topic area"
+        ]
+        
+        # Multi-step workflow indicators
+        multistep_indicators = [
+            ("propose", "topics"),
+            ("download", "papers", "topic"),
+            ("select", "defend"),
+            ("critically", "assess")
+        ]
+        
+        # Count matches
+        doctoral_matches = sum(1 for ind in doctoral_indicators if ind in query_lower)
+        multistep_matches = sum(
+            1 for ind in multistep_indicators 
+            if all(word in query_lower for word in ind)
+        )
+        
+        is_research_workflow = doctoral_matches >= 2 or multistep_matches >= 2
+        
+        # Determine workflow type
+        workflow_type = None
+        if doctoral_matches >= 2:
+            workflow_type = "doctoral_research_planning"
+        elif "literature review" in query_lower:
+            workflow_type = "literature_review"
+        elif multistep_matches >= 2:
+            workflow_type = "multi_step_research"
+        
+        return {
+            "is_research_workflow": is_research_workflow,
+            "workflow_type": workflow_type,
+            "confidence": (doctoral_matches + multistep_matches) / 5.0,
+            "indicators": {
+                "doctoral": doctoral_matches,
+                "multistep": multistep_matches
+            }
+        }
+    
+    def get_workflow_progress(self) -> Dict[str, Any]:
+        """
+        Get progress of current workflow execution.
+        
+        Returns:
+            Dict with current workflow status and progress
+        """
+        if self._workflow_orchestrator is None:
+            return {"status": "no_active_workflow"}
+        
+        return self._workflow_orchestrator.get_progress()
+    
+    async def execute_workflow_step(
+        self,
+        step_type: str,
+        parameters: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Execute a single workflow step manually.
+        
+        Useful for custom workflows or debugging.
+        
+        Args:
+            step_type: Type of step (analysis, search, download, etc.)
+            parameters: Step parameters
+            
+        Returns:
+            Step execution result
+        """
+        try:
+            from core.workflow_orchestrator import WorkflowStep, StepType, StepStatus
+            
+            orchestrator = self._get_workflow_orchestrator()
+            
+            step = WorkflowStep(
+                id="manual_step",
+                type=StepType(step_type),
+                description=parameters.get("description", "Manual step"),
+                parameters=parameters
+            )
+            
+            await orchestrator._execute_step(step)
+            
+            return {
+                "success": step.status == StepStatus.COMPLETED,
+                "result": step.result,
+                "error": step.error
+            }
+            
+        except Exception as e:
+            log.exception("Error executing manual workflow step")
+            return {
+                "success": False,
+                "error": str(e)
+            }
