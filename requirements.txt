@@ -1,4 +1,4 @@
-# requirements.txt
+# requirements_fixed.txt - Fixed for Python 3.14
 # LlamaIndex - flexible versions to avoid build issues with Python 3.13
 llama-index
 llama-index-core
@@ -12,7 +12,7 @@ pypdf2>=3.0.1
 pdfplumber>=0.10.3
 pymupdf>=1.24.0
 
-# Vector Store & Database
+# Vector Store & Database - using specific versions that work with Python 3.14
 chromadb>=0.5.0
 qdrant-client>=1.7.1
 
@@ -25,6 +25,7 @@ python-dotenv>=1.0.0
 watchdog>=3.0.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
+nest-asyncio>=1.6.0
 
 # Logging & Monitoring
 loguru>=0.7.0
@@ -39,3 +40,6 @@ fastapi-poe>=0.0.36
 # Azure OpenAI
 openai>=1.0.0
 httpx>=0.24.0
+
+# Pandas - try to install binary wheel only
+pandas>=2.0.0 --only-binary=pandas
