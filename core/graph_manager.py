@@ -455,10 +455,35 @@ class GraphManager:
             graph_store=self.graph_store
         )
         
-        # Initialize knowledge graph index (will be set during build)
+        # Initialize knowledge graph index from existing store if available
         self.kg_index = None
+        self._initialize_kg_index_if_exists()
         
         log.info("✓ GraphManager initialized")
+    
+    def _initialize_kg_index_if_exists(self):
+        """Initialize KG index from existing graph store if data exists"""
+        try:
+            # Check if graph store has any data
+            if hasattr(self.graph_store, '_data') and self.graph_store._data:
+                # Try to load existing KnowledgeGraphIndex
+                self.kg_index = KnowledgeGraphIndex(
+                    storage_context=self.storage_context
+                )
+                log.info("✓ Initialized KnowledgeGraphIndex from existing data")
+            elif len(self.nx_graph.nodes) > 0:
+                # If NetworkX graph has data but no LlamaIndex data,
+                # create empty index for future queries
+                self.kg_index = KnowledgeGraphIndex(
+                    storage_context=self.storage_context
+                )
+                log.info("✓ Initialized empty KnowledgeGraphIndex")
+            else:
+                self.kg_index = None
+                log.info("No existing graph data found, KG index will be created when documents are added")
+        except Exception as e:
+            log.warning(f"Could not initialize KG index from existing data: {e}")
+            self.kg_index = None
     
     def build_graph_from_documents(
         self, 

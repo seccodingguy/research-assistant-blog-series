@@ -1,0 +1,1066 @@
+# Graph Ontology Configuration
+# This file defines the types and keywords for knowledge graph classification
+# Edit this file to add new types or keywords without modifying code
+
+# Relationship Types
+relationship_types:
+  # Causal relationships
+  - name: "causes"
+    description: "One entity causes another"
+    
+  - name: "correlates_with"
+    description: "Statistical correlation between entities"
+    
+  - name: "inhibits"
+    description: "One entity inhibits another"
+    
+  - name: "enhances"
+    description: "One entity enhances another"
+    
+  - name: "supports"
+    description: "Evidence or logical support"
+    
+  - name: "interacts_with"
+    description: "General interaction"
+    
+  - name: "associated_with"
+    description: "General association"
+    
+  # Functional relationships
+  - name: "uses"
+    description: "One entity uses another"
+    
+  - name: "implements"
+    description: "Implementation relationship"
+    
+  - name: "defines"
+    description: "Definition relationship"
+    
+  - name: "provides"
+    description: "Provision relationship"
+    
+  - name: "requires"
+    description: "Dependency relationship"
+    
+  - name: "enables"
+    description: "Enablement relationship"
+    
+  - name: "creates"
+    description: "Creation relationship"
+    
+  # Structural relationships
+  - name: "belongs_to"
+    description: "Membership relationship"
+    
+  - name: "part_of"
+    description: "Component relationship"
+    
+  # Academic relationships
+  - name: "authored_by"
+    description: "Authorship relationship"
+    
+  - name: "published_in"
+    description: "Publication venue"
+    
+  - name: "referenced_by"
+    description: "Citation relationship"
+
+
+# Concept Types (Node Categories)
+concept_types:
+  # AI & ML
+  - name: "artificial_intelligence"
+    display_name: "artificial intelligence"
+    category: "ai_ml"
+    
+  - name: "deep_learning"
+    display_name: "deep learning"
+    category: "ai_ml"
+    
+  - name: "machine_learning"
+    display_name: "machine learning"
+    category: "ai_ml"
+    
+  - name: "models"
+    display_name: "models"
+    category: "ai_ml"
+    
+  - name: "neural_network"
+    display_name: "neural network"
+    category: "ai_ml"
+    
+  - name: "llm"
+    display_name: "large language model"
+    category: "ai_ml"
+    
+  - name: "agent"
+    display_name: "agent"
+    category: "ai_ml"
+    
+  - name: "reasoning"
+    display_name: "reasoning"
+    category: "ai_ml"
+    
+  - name: "embedding"
+    display_name: "embedding"
+    category: "ai_ml"
+    
+  - name: "nlp"
+    display_name: "natural language processing"
+    category: "ai_ml"
+    
+  - name: "computer_vision"
+    display_name: "computer vision"
+    category: "ai_ml"
+    
+  - name: "robotics"
+    display_name: "robotics"
+    category: "ai_ml"
+    
+  # Research & Documents
+  - name: "document_type"
+    display_name: "document_type"
+    category: "research"
+    
+  - name: "research"
+    display_name: "research"
+    category: "research"
+    
+  - name: "method"
+    display_name: "method"
+    category: "research"
+    
+  - name: "formal_method"
+    display_name: "formal_method"
+    category: "research"
+    
+  # Security & Cryptography
+  - name: "person"
+    display_name: "person"
+    category: "security"
+    
+  - name: "actor"
+    display_name: "actor"
+    category: "security"
+    
+  - name: "cryptography"
+    display_name: "cryptography"
+    category: "security"
+    
+  - name: "security"
+    display_name: "security"
+    category: "security"
+    
+  - name: "authentication"
+    display_name: "authentication"
+    category: "security"
+    
+  - name: "encryption"
+    display_name: "encryption"
+    category: "security"
+    
+  - name: "authorization"
+    display_name: "authorization"
+    category: "security"
+    
+  # Network & Systems
+  - name: "protocol"
+    display_name: "protocol"
+    category: "network"
+    
+  - name: "network"
+    display_name: "network"
+    category: "network"
+    
+  - name: "distributed_system"
+    display_name: "distributed_system"
+    category: "network"
+    
+  - name: "communication"
+    display_name: "communication"
+    category: "network"
+    
+  - name: "message"
+    display_name: "message"
+    category: "network"
+    
+  # Components & Architecture
+  - name: "component"
+    display_name: "component"
+    category: "architecture"
+    
+  - name: "role"
+    display_name: "role"
+    category: "architecture"
+    
+  - name: "system"
+    display_name: "system"
+    category: "architecture"
+    
+  - name: "framework"
+    display_name: "framework"
+    category: "architecture"
+    
+  - name: "architecture"
+    display_name: "architecture"
+    category: "architecture"
+    
+  - name: "api"
+    display_name: "api"
+    category: "architecture"
+    
+  # Tools & Methods
+  - name: "tool"
+    display_name: "tool"
+    category: "tools"
+    
+  - name: "algorithm"
+    display_name: "algorithm"
+    category: "tools"
+    
+  # Data & Resources
+  - name: "data"
+    display_name: "data"
+    category: "data"
+    
+  - name: "dataset"
+    display_name: "dataset"
+    category: "data"
+    
+  - name: "process"
+    display_name: "process"
+    category: "data"
+    
+  # Organizations
+  - name: "organization"
+    display_name: "organization"
+    category: "organization"
+    
+  - name: "company"
+    display_name: "company"
+    category: "organization"
+    
+  # Temporal & Measurement
+  - name: "temporal"
+    display_name: "temporal"
+    category: "metadata"
+    
+  - name: "measurement"
+    display_name: "measurement"
+    category: "metadata"
+    
+  # Misc
+  - name: "metric"
+    display_name: "metric"
+    category: "misc"
+    
+  - name: "knowledge"
+    display_name: "knowledge"
+    category: "misc"
+    
+  - name: "knowledge_graph"
+    display_name: "knowledge graph"
+    category: "misc"
+    
+  - name: "other"
+    display_name: "other"
+    category: "misc"
+    
+  - name: "unknown"
+    display_name: "unknown"
+    category: "misc"
+
+
+# Keyword Mappings
+# Maps keywords/phrases to concept types
+keyword_mappings:
+  # AI & ML Keywords
+  artificial_intelligence:
+    - "artificial intelligence"
+    - "ai system"
+    
+  machine_learning:
+    - "machine learning"
+    - "ml model"
+    
+  deep_learning:
+    - "deep learning"
+    - "dl"
+    
+  agent:
+    - "agent"
+    - "agents"
+    - "agentic"
+    - "autonomous agent"
+    
+  llm:
+    - "llm"
+    - "large language model"
+    - "language model"
+    
+  neural_network:
+    - "neural network"
+    - "neural net"
+    - "ann"
+    
+  embedding:
+    - "embedding"
+    - "embeddings"
+    - "vector embedding"
+    
+  models:
+    - "model"
+    - "transformer"
+    - "transformers"
+    
+  reasoning:
+    - "reasoning"
+    - "inference"
+    
+  nlp:
+    - "nlp"
+    - "natural language processing"
+    - "language processing"
+    
+  computer_vision:
+    - "computer vision"
+    - "cv"
+    - "image recognition"
+    
+  # Research & Documents
+  document_type:
+    - "paper"
+    - "document"
+    - "publication"
+    - "article"
+    - "thesis"
+    - "dissertation"
+    - "report"
+    
+  research:
+    - "research"
+    - "survey"
+    - "study"
+    - "investigation"
+    
+  method:
+    - "analysis"
+    - "evaluation"
+    - "experiment"
+    - "simulation"
+    - "implementation"
+    - "design"
+    - "deployment"
+    - "execution"
+    - "optimization"
+    - "benchmark"
+    
+  formal_method:
+    - "proof"
+    - "verification"
+    - "theorem"
+    - "lemma"
+    - "invariant"
+    - "induction"
+    - "formal verification"
+    
+  algorithm:
+    - "algorithm"
+    - "heuristic"
+    
+  # Security Actors (Protocol Papers)
+  person:
+    - "alice"
+    - "bob"
+    - "charlie"
+    - "david"
+    - "eve"
+    - "mallory"
+    - "trudy"
+    
+  actor:
+    - "attacker"
+    - "adversary"
+    - "intruder"
+    - "eavesdropper"
+    - "malicious actor"
+    
+  role:
+    - "verifier"
+    - "prover"
+    - "challenger"
+    - "participant"
+    - "player"
+    - "user"
+    - "client"
+    - "server"
+    - "coordinator"
+    - "sender"
+    - "receiver"
+    - "initiator"
+    - "responder"
+    - "observer"
+    
+  # Cryptography & Security
+  cryptography:
+    - "cryptography"
+    - "cryptographic"
+    - "cipher"
+    - "hash"
+    - "signature"
+    - "key"
+    - "certificate"
+    - "secret"
+    - "encryption key"
+    
+  security:
+    - "security"
+    - "secure"
+    
+  authentication:
+    - "authentication"
+    - "auth"
+    
+  encryption:
+    - "encryption"
+    - "encrypt"
+    
+  authorization:
+    - "authorization"
+    - "oauth"
+    
+  # Network & Protocols
+  protocol:
+    - "protocol"
+    - "a2a"
+    - "mcp"
+    - "anp"
+    - "json-rpc"
+    - "http"
+    - "https"
+    - "tcp"
+    - "udp"
+    - "ftp"
+    - "gridftp"
+    - "smtp"
+    - "gossip"
+    - "acp"
+    - "ecp"
+    - "rpc"
+    - "grpc"
+    - "soap"
+    
+  network:
+    - "network"
+    - "decentralized"
+    - "peer-to-peer"
+    - "p2p"
+    - "dht"
+    
+  distributed_system:
+    - "consensus"
+    - "replication"
+    - "synchronization"
+    - "consistency"
+    - "partition"
+    - "sharding"
+    - "fault tolerance"
+    - "distributed system"
+    
+  communication:
+    - "communication"
+    
+  message:
+    - "message"
+    - "messaging"
+    - "request"
+    - "response"
+    - "query"
+    - "command"
+    - "event"
+    - "notification"
+    - "signal"
+    
+  # Components & Architecture
+  component:
+    - "node"
+    - "peer"
+    - "router"
+    - "gateway"
+    - "monitor"
+    - "controller"
+    - "manager"
+    - "handler"
+    - "adapter"
+    - "wrapper"
+    - "proxy"
+    - "module"
+    - "plugin"
+    - "extension"
+    
+  system:
+    - "system"
+    - "database"
+    - "storage"
+    - "cache"
+    - "environment"
+    - "platform"
+    - "container"
+    - "virtual machine"
+    - "cloud"
+    - "edge"
+    - "mas"
+    
+  framework:
+    - "framework"
+    - "langgraph"
+    - "autogen"
+    - "crewai"
+    - "metagpt"
+    - "agora"
+    - "swarm"
+    - "haystack"
+    - "langchain"
+    - "library"
+    - "package"
+    
+  architecture:
+    - "architecture"
+    - "client-server"
+    
+  api:
+    - "api"
+    - "rest"
+    
+  # Tools
+  tool:
+    - "tool"
+    - "cpsa"
+    - "uppaal"
+    - "proverif"
+    - "tamarin"
+    - "coq"
+    - "isabelle"
+    - "compiler"
+    - "interpreter"
+    - "debugger"
+    
+  # Data & Processes
+  data:
+    - "data"
+    - "metadata"
+    - "resource"
+    - "file"
+    - "buffer"
+    - "queue"
+    - "stream"
+    - "information"
+    - "schema"
+    - "specification"
+    
+  dataset:
+    - "dataset"
+    - "datasets"
+    
+  process:
+    - "process"
+    - "task"
+    - "job"
+    - "thread"
+    - "workflow"
+    - "pipeline"
+    
+  # Organizations
+  organization:
+    - "university"
+    - "institute"
+    - "laboratory"
+    - "foundation"
+    
+  company:
+    - "google"
+    - "openai"
+    - "anthropic"
+    - "microsoft"
+    - "meta"
+    - "amazon"
+    - "apple"
+    - "nvidia"
+    
+  # Metrics
+  metric:
+    - "performance"
+    - "efficiency"
+    - "throughput"
+    - "latency"
+    - "scalability"
+    - "reliability"
+    - "availability"
+    - "accuracy"
+    
+  # Other
+  knowledge:
+    - "knowledge"
+    
+  knowledge_graph:
+    - "knowledge graph"
+    - "knowledge graphs"
+    - "ontology"
+    
+  other:
+    - "context"
+    - "memory"
+    - "prompt"
+    - "prompting"
+    - "hallucination"
+  
+  # ========== PHASE 3: Extended Domain Keywords ==========
+  
+  # Security Protocols (beyond basic keywords)
+  protocol:
+    - "needham-schroeder"
+    - "diffie-hellman"
+    - "kerberos"
+    - "ipsec"
+    - "tls handshake"
+    - "ssl certificate"
+    - "x.509"
+    - "pki"
+    - "challenge-response"
+  
+  # Cryptography (extended)
+  cryptography:
+    - "elliptic curve"
+    - "rsa algorithm"
+    - "aes encryption"
+    - "sha"
+    - "md5"
+    - "hmac"
+    - "nonce"
+    - "salt"
+    - "initialization vector"
+    - "key exchange"
+    - "key derivation"
+  
+  # Distributed Systems (extended)
+  distributed_system:
+    - "byzantine"
+    - "paxos"
+    - "raft"
+    - "eventual consistency"
+    - "strong consistency"
+    - "causal consistency"
+    - "two-phase commit"
+    - "three-phase commit"
+    - "vector clock"
+    - "lamport timestamp"
+    - "quorum"
+    - "leader election"
+  
+  # AI/ML Models (extended)
+  framework:
+    - "bert"
+    - "gpt"
+    - "clip"
+    - "stable diffusion"
+    - "whisper"
+    - "resnet"
+    - "vgg"
+    - "inception"
+    - "efficientnet"
+    - "yolo"
+    - "rcnn"
+  
+  # ML Methods (extended)
+  method:
+    - "transfer learning"
+    - "fine-tuning"
+    - "zero-shot"
+    - "few-shot"
+    - "one-shot"
+    - "meta-learning"
+    - "multi-task"
+    - "self-supervised"
+    - "contrastive learning"
+    - "curriculum learning"
+    - "active learning"
+    - "federated learning"
+    - "distillation"
+    - "pruning"
+    - "quantization"
+  
+  # Data concepts (extended)
+  data:
+    - "training data"
+    - "test data"
+    - "validation data"
+    - "training set"
+    - "test set"
+    - "validation set"
+    - "holdout set"
+    - "cross-validation"
+    - "data augmentation"
+    - "preprocessing"
+    - "feature engineering"
+    - "feature extraction"
+    - "embedding space"
+  
+  # Metrics (extended)
+  metric:
+    - "precision"
+    - "recall"
+    - "f1 score"
+    - "accuracy"
+    - "auc"
+    - "roc curve"
+    - "confusion matrix"
+    - "mean squared error"
+    - "mse"
+    - "rmse"
+    - "mae"
+    - "cross-entropy"
+    - "perplexity"
+    - "bleu score"
+    - "rouge score"
+  
+  # Mathematical/Statistical
+  algorithm:
+    - "gradient descent"
+    - "backpropagation"
+    - "forward pass"
+    - "backward pass"
+    - "convolution"
+    - "pooling"
+    - "dropout"
+    - "batch normalization"
+    - "layer normalization"
+    - "softmax"
+    - "relu"
+    - "sigmoid"
+    - "tanh"
+  
+  # Roles (extended)
+  role:
+    - "adversary"
+    - "eavesdropper"
+    - "man-in-the-middle"
+    - "trusted third party"
+    - "certificate authority"
+    - "key server"
+    - "authentication server"
+  
+  # Components (extended)
+  component:
+    - "encoder"
+    - "decoder"
+    - "attention head"
+    - "feedforward"
+    - "residual connection"
+    - "skip connection"
+    - "bottleneck"
+    - "feature map"
+    - "activation function"
+    - "loss function"
+    - "optimizer"
+
+
+# Pattern-Based Classification Rules
+# These patterns are checked after keyword matching
+classification_patterns:
+  # ========== PHASE 4: Non-Concept Filters ==========
+  # These patterns identify non-concepts (timestamps, paths, variables, etc.)
+  # Marked as 'non_concept' to be filtered out before LLM classification
+  
+  - name: "non_concept"
+    pattern: '^\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}'
+    description: "ISO timestamps (e.g., 2025-10-31T09:22:43)"
+    
+  - name: "non_concept"
+    pattern: '^[a-z]+_[a-z]+(_[a-z]+)*$'
+    description: "Snake_case variable names (e.g., search_results, data_loader)"
+    
+  - name: "non_concept"
+    pattern: '^[a-z]+[A-Z][a-zA-Z]*[A-Z][a-zA-Z]*$'
+    description: "camelCase or PascalCase variables (e.g., dataLoader, HttpRequest)"
+    
+  - name: "non_concept"
+    pattern: '(^|/)[\w\-]+\.(txt|py|java|cpp|js|json|xml|yaml|yml|md|html|css|log|csv)$'
+    description: "File names with extensions"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^(/|\\\\|\.\.?/|[A-Z]:\\\\)'
+    description: "File system paths (absolute or relative)"
+    
+  - name: "non_concept"
+    pattern: '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$'
+    description: "IP addresses and ports"
+    
+  - name: "non_concept"
+    pattern: '^(https?|ftp|file)://'
+    description: "URLs"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^[a-f0-9]{32,}$'
+    description: "Hash values (MD5, SHA, etc.)"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    description: "UUIDs"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^v?\d+\.\d+(\.\d+)?(-[a-z0-9]+)?$'
+    description: "Version numbers (e.g., v1.2.3, 2.0.1-beta)"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^[\w\.\-]+@[\w\.\-]+\.[a-z]{2,}$'
+    description: "Email addresses"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^[A-Z0-9_]{5,}$'
+    description: "Constants (e.g., MAX_SIZE, API_KEY)"
+    
+  - name: "non_concept"
+    pattern: '^\$[a-zA-Z_][a-zA-Z0-9_]*$'
+    description: "Variable references (e.g., $variable, $PATH)"
+    
+  - name: "non_concept"
+    pattern: '^[a-z]+\d+(\.[a-z]+\d+)*$'
+    description: "Parameter names (e.g., param1, config1.value2)"
+    flags: "IGNORECASE"
+    
+  - name: "non_concept"
+    pattern: '^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$'
+    description: "Dimensions (e.g., 640x480, 1920x1080)"
+    flags: "IGNORECASE"
+  
+  # ========== PHASE 1-2: Base Patterns ==========
+  
+  - name: "measurement"
+    pattern: '\d+\.?\d*\s*(km|m|cm|mm|ms|sec|second|min|minute|hour|gb|mb|tb|kb|byte)'
+    description: "Numeric values with units"
+    
+  - name: "temporal"
+    pattern: '^(19|20)\d{2}$'
+    description: "Year format (1900-2099)"
+    
+  - name: "temporal"
+    pattern: '(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(19|20)\d{2}'
+    description: "Month + Year format"
+    
+  - name: "person"
+    pattern: 'et al'
+    description: "Academic citation format"
+    flags: "IGNORECASE"
+    
+  - name: "person"
+    pattern: '\b[A-Z]\.\s*[A-Z]'
+    description: "Initials format (A. B.)"
+    
+  - name: "organization"
+    keywords:
+      - "university"
+      - "institute"
+      - "laboratory"
+      - "lab"
+      - "inc."
+      - "llc"
+      - "ltd"
+      - "corp"
+      - "corporation"
+      - "foundation"
+      - "college"
+      - "school"
+      - "center"
+      - "centre"
+    description: "Organization indicators"
+    
+  - name: "component"
+    pattern: '[/\\\_]'
+    description: "File paths or technical identifiers"
+    secondary_check:
+      extensions: [".py", ".java", ".cpp", ".js", ".json", ".xml", ".yaml"]
+    
+  - name: "other"
+    pattern: '^[A-Za-z]$'
+    description: "Single letter variables"
+    
+  - name: "measurement"
+    pattern: '^[\d\.\-]+$'
+    description: "Numeric-only values"
+  
+  # ========== PHASE 3: Domain-Specific Patterns ==========
+  
+  # Multi-word academic/technical terms
+  - name: "method"
+    pattern: '\b(finite state machine|state machine|neural network|deep learning|machine learning|reinforcement learning|supervised learning|attention mechanism|transformer model)\b'
+    description: "Multi-word technical methods"
+    flags: "IGNORECASE"
+  
+  - name: "data"
+    pattern: '\b(training data|test data|validation set|training set|test set|data set|image encoder|visual evidence)\b'
+    description: "Multi-word data concepts"
+    flags: "IGNORECASE"
+  
+  - name: "metric"
+    pattern: '\b(state-of-the-art|radiologist fte|image interpretation|accuracy score|f1 score|precision recall)\b'
+    description: "Multi-word metrics and measurements"
+    flags: "IGNORECASE"
+  
+  - name: "cryptography"
+    pattern: '\b(scalar multiplication|public key|private key|symmetric key|encryption key|digital signature|hash function)\b'
+    description: "Multi-word cryptography terms"
+    flags: "IGNORECASE"
+  
+  - name: "component"
+    pattern: '\b(pre-trained|enterprise-centric|low-bandwidth|mime-based|eip-\d+)\b'
+    description: "Hyphenated technical components"
+    flags: "IGNORECASE"
+  
+  # Academic/mathematical notation
+  - name: "other"
+    pattern: '^[A-Z][a-z]?[\d\[\]()·^-]+$'
+    description: "Mathematical notation (e.g., C0[·], Γ2, K^-1)"
+  
+  - name: "other"
+    pattern: '^O\(.*\)$'
+    description: "Big-O notation"
+    flags: "IGNORECASE"
+  
+  # Person names (more sophisticated)
+  - name: "person"
+    pattern: '\b[A-Z][a-z]+\s+[a-z]{1,3}\s+[A-Z][a-z]+'
+    description: "Full names with middle initial/word (e.g., G. brida, John von Neumann)"
+  
+  - name: "person"
+    pattern: '\b(dr\.|prof\.|ph\.?d\.?|professor|doctor)\s+'
+    description: "Academic titles"
+    flags: "IGNORECASE"
+  
+  # Protocol/Algorithm names
+  - name: "protocol"
+    pattern: '\b(needham-schroeder|diffie-hellman|tls|ssl|kerberos|ipsec|ssh)\b'
+    description: "Well-known security protocols"
+    flags: "IGNORECASE"
+  
+  - name: "algorithm"
+    pattern: '\b(dijkstra|bellman-ford|floyd-warshall|a-star|quicksort|mergesort|rsa|aes|sha-?\d+)\b'
+    description: "Well-known algorithms"
+    flags: "IGNORECASE"
+  
+  # Distributed systems terms
+  - name: "distributed_system"
+    pattern: '\b(byzantine fault|consensus algorithm|paxos|raft|two-phase commit|three-phase commit)\b'
+    description: "Distributed systems concepts"
+    flags: "IGNORECASE"
+  
+  # AI/ML specific multi-word terms
+  - name: "framework"
+    pattern: '\b(hugging face|stable diffusion|clip model|bert model|gpt-\d+|llama-?\d*)\b'
+    description: "AI/ML models and frameworks"
+    flags: "IGNORECASE"
+  
+  - name: "method"
+    pattern: '\b(transfer learning|fine-tuning|zero-shot|few-shot|one-shot|multi-task learning|meta-learning)\b'
+    description: "ML training methods"
+    flags: "IGNORECASE"
+  
+  # Generic multi-word classification based on suffix
+  - name: "process"
+    pattern: '\b\w+\s+(process|procedure|workflow|pipeline|operation)\b'
+    description: "Multi-word processes"
+    flags: "IGNORECASE"
+  
+  - name: "component"
+    pattern: '\b\w+\s+(component|module|service|interface|layer)\b'
+    description: "Multi-word components"
+    flags: "IGNORECASE"
+  
+  - name: "system"
+    pattern: '\b\w+\s+(system|platform|infrastructure|architecture)\b'
+    description: "Multi-word systems"
+    flags: "IGNORECASE"
+
+
+# Relationship Normalization Mappings
+relationship_mappings:
+  uses:
+    - "uses"
+    - "utilizes"
+    - "employs"
+    - "leverages"
+    - "applies"
+    
+  implements:
+    - "implements"
+    - "realizes"
+    - "executes"
+    
+  provides:
+    - "provides"
+    - "offers"
+    - "supplies"
+    - "gives"
+    
+  enables:
+    - "enables"
+    - "allows"
+    - "facilitates"
+    - "permits"
+    
+  requires:
+    - "requires"
+    - "needs"
+    - "depends on"
+    - "relies on"
+    
+  supports:
+    - "supports"
+    - "backs"
+    - "validates"
+    
+  enhances:
+    - "enhances"
+    - "improves"
+    - "boosts"
+    - "optimizes"
+    
+  creates:
+    - "creates"
+    - "generates"
+    - "produces"
+    - "builds"
+    
+  defines:
+    - "defines"
+    - "specifies"
+    - "describes"
+    - "declares"
+    
+  authored_by:
+    - "authored"
+    - "written by"
+    - "created by"
+    - "developed by"
+    
+  published_in:
+    - "published in"
+    - "appeared in"
+    
+  belongs_to:
+    - "belongs to"
+    - "member of"
+    
+  part_of:
+    - "part of"
+    - "contained in"
+    
+  interacts_with:
+    - "interacts with"
+    - "communicates with"
+    - "works with"

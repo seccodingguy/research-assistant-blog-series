@@ -314,8 +314,8 @@ class PoeLLM(CustomLLM):
                     self._loop
                 )
                 
-                # Block until we get the result (with timeout)
-                full_text = future.result(timeout=120)
+                # Block until we get the result (with reduced timeout)
+                full_text = future.result(timeout=60)
                 
                 elapsed = time.time() - start_time
                 
